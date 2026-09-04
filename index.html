@@ -4,13 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VIP Fee Calculator</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
     
     <div class="app-container">
         <header>
-            <h1>VIP料金算出ツール</h1>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h1>VIP料金算出ツール</h1>
+                <button id="open-settings-btn" class="icon-btn" aria-label="設定を開く">⚙️設定</button>
+            </div>
         </header>
 
         <main>
@@ -103,6 +106,57 @@
         </main>
     </div>
 
-    <script src="main.js"></script>
+    <!-- Settings Modal -->
+    <dialog id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ 料金設定の管理</h2>
+                <button id="close-settings-btn" class="close-btn">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit-store-select">編集する店舗を選択</label>
+                    <select id="edit-store-select"></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-store-name">店舗名</label>
+                    <input type="text" id="edit-store-name" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                </div>
+
+                <h3>相席料金 (60分換算)</h3>
+                <div class="fee-grid">
+                    <div>
+                        <h4>平日</h4>
+                        <label>Open〜20時 <input type="number" id="fee-wd-1" inputmode="numeric"></label>
+                        <label>20時〜22時 <input type="number" id="fee-wd-2" inputmode="numeric"></label>
+                        <label>22時〜24時 <input type="number" id="fee-wd-3" inputmode="numeric"></label>
+                        <label>24時〜Close <input type="number" id="fee-wd-4" inputmode="numeric"></label>
+                    </div>
+                    <div>
+                        <h4>週末（金土祝前）</h4>
+                        <label>Open〜20時 <input type="number" id="fee-we-1" inputmode="numeric"></label>
+                        <label>20時〜22時 <input type="number" id="fee-we-2" inputmode="numeric"></label>
+                        <label>22時〜24時 <input type="number" id="fee-we-3" inputmode="numeric"></label>
+                        <label>24時〜Close <input type="number" id="fee-we-4" inputmode="numeric"></label>
+                    </div>
+                </div>
+
+                <details class="advanced-settings">
+                    <summary>高度な設定 (VIPルーム等のJSON編集)</summary>
+                    <textarea id="advanced-json" rows="10" style="width: 100%; margin-top: 0.5rem; font-family: monospace;"></textarea>
+                    <p style="font-size: 0.8rem; color: #ef4444; margin-top: 0.25rem;">※JSONフォーマットが壊れると動作しなくなりますのでご注意ください。</p>
+                </details>
+            </div>
+
+            <div class="modal-footer">
+                <button id="reset-settings-btn" class="btn btn-danger">初期設定に戻す</button>
+                <button id="save-settings-btn" class="btn btn-primary">保存して反映</button>
+            </div>
+        </div>
+    </dialog>
+
+    <script src="main.js?v=3"></script>
 </body>
 </html>

@@ -176,3 +176,134 @@ select:disabled {
         flex-direction: column;
     }
 }
+
+/* Settings Button */
+.icon-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    background-color: #fff;
+}
+.icon-btn:hover {
+    background-color: #f9fafb;
+}
+
+/* Modal */
+.modal {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    margin: auto;
+    width: 90%;
+    max-width: 600px;
+    padding: 0;
+    background: var(--card-bg);
+}
+.modal::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.modal-header h2 {
+    font-size: 1.2rem;
+}
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+.close-btn:hover {
+    color: var(--text-main);
+}
+
+.modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.fee-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    margin-top: 0.5rem;
+}
+@media (max-width: 480px) {
+    .fee-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.fee-grid h4 {
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+}
+.fee-grid label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    font-weight: normal;
+}
+.fee-grid input {
+    width: 100px;
+    padding: 0.25rem 0.5rem;
+}
+
+.advanced-settings {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+.advanced-settings summary {
+    cursor: pointer;
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+.btn-danger {
+    background-color: #ef4444;
+    color: white;
+}
+.btn-danger:hover {
+    background-color: #dc2626;
+}
