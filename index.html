@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Fee Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <div class="app-container">
+        <header>
+            <h1>VIP料金算出ツール</h1>
+        </header>
+
+        <main>
+            <form id="calculator-form">
+                
+                <div class="form-group">
+                    <label for="people">利用人数 (名)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="people" min="1" max="20" value="2" required>
+                    </div>
+                </div>
+
+                <div class="form-group row-group">
+                    <div class="half-group">
+                        <label for="day-type">曜日</label>
+                        <div class="select-wrapper">
+                            <select id="day-type">
+                                <option value="weekday">平日</option>
+                                <option value="weekend">金・土・祝前日</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="half-group">
+                        <label for="time-slot">入店時間帯</label>
+                        <div class="select-wrapper">
+                            <select id="time-slot">
+                                <option value="open-20">Open 〜 20:00</option>
+                                <option value="20-22">20:00 〜 22:00</option>
+                                <option value="22-24">22:00 〜 24:00</option>
+                                <option value="24-close">24:00 〜 Close</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="room-grade">VIPルーム種別</label>
+                    <div class="select-wrapper">
+                        <select id="room-grade">
+                            <option value="3300_weekday">平日 3,300円 (2名まで)</option>
+                            <option value="5500_weekday">平日 5,500円 (4名まで)</option>
+                            <option value="5500_weekend" disabled>週末 5,500円 (2名まで)</option>
+                            <option value="7700_weekend" disabled>週末 7,700円 (4名まで)</option>
+                            <option value="11000_weekend" disabled>週末 11,000円 (4名まで)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group special-plans">
+                    <label>特殊プラン</label>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="plan-1person" disabled>
+                        1名様での利用 (60分 5,940円)
+                    </label>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="plan-40s">
+                        40代以上限定プラン (60分 5,940円)
+                    </label>
+                </div>
+            </form>
+
+            <div class="result-section">
+                <div class="result-label">1名あたりの総額 (税込)</div>
+                <div class="result-value">
+                    <span class="currency">¥</span>
+                    <span id="total-price">0</span>
+                </div>
+                
+                <div class="breakdown">
+                    <div class="breakdown-item">
+                        <span>VIPルーム割勘</span>
+                        <span id="breakdown-room">¥0</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>相席料金 (60分)</span>
+                        <span id="breakdown-matching">¥0</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>チャージ料金 (固定)</span>
+                        <span id="breakdown-charge">¥550</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
