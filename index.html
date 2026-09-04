@@ -72,11 +72,11 @@
                     <label>特殊プラン</label>
                     <label class="checkbox-container">
                         <input type="checkbox" id="plan-1person" disabled>
-                        1名様での利用 (60分 5,940円)
+                        <span id="label-1person">1名様での利用 (60分 5,940円)</span>
                     </label>
                     <label class="checkbox-container">
                         <input type="checkbox" id="plan-40s">
-                        40代以上限定プラン (60分 5,940円)
+                        <span id="label-40s">40代以上限定プラン (60分 5,940円)</span>
                     </label>
                 </div>
             </form>
@@ -143,6 +143,11 @@
                     </div>
                 </div>
 
+                <div class="form-group" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border-color);">
+                    <label for="edit-special-fee" style="font-weight: 600; color: var(--text-main);">特殊プラン料金（1名・40代 / 60分）</label>
+                    <input type="number" id="edit-special-fee" style="width: 150px; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 6px;" inputmode="numeric">
+                </div>
+
                 <div class="advanced-settings" open>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <h3 style="margin: 0;">VIPルーム設定</h3>
@@ -162,6 +167,6 @@
         </div>
     </dialog>
 
-    <script src="main.js?v=4"></script>
+    <script src="main.js?v=5"></script>
 </body>
 </html>

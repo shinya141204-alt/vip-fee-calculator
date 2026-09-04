@@ -2,6 +2,7 @@
 const DEFAULT_STORE_CONFIGS = {
     'store-a': {
         name: 'A店 (現在の設定)',
+        specialPlanFee: 5940,
         matchingFee: {
             weekday: { 'open-20': 440 * 6, '20-22': 550 * 6, '22-24': 660 * 6, '24-close': 770 * 6 },
             weekend: { 'open-20': 500 * 6, '20-22': 600 * 6, '22-24': 700 * 6, '24-close': 800 * 6 }
@@ -16,6 +17,7 @@ const DEFAULT_STORE_CONFIGS = {
     },
     'store-b': {
         name: 'B店 (ダミーテスト用)',
+        specialPlanFee: 6000,
         matchingFee: {
             weekday: { 'open-20': 2000, '20-22': 3000, '22-24': 4000, '24-close': 5000 },
             weekend: { 'open-20': 3000, '20-22': 4000, '22-24': 5000, '24-close': 6000 }
@@ -41,7 +43,6 @@ try {
 }
 
 const CHARGE_FEE = 550;
-const SPECIAL_PLAN_FEE = 5940;
 
 // --- DOM Elements (Main) ---
 const storeSelect = document.getElementById('store-select');
@@ -58,12 +59,16 @@ const breakdownMatchingEl = document.getElementById('breakdown-matching');
 const breakdownChargeEl = document.getElementById('breakdown-charge');
 const resultValueContainer = document.querySelector('.result-value');
 
+const label1Person = document.getElementById('label-1person');
+const label40s = document.getElementById('label-40s');
+
 // --- DOM Elements (Settings) ---
 const modal = document.getElementById('settings-modal');
 const openSettingsBtn = document.getElementById('open-settings-btn');
 const closeSettingsBtn = document.getElementById('close-settings-btn');
 const editStoreSelect = document.getElementById('edit-store-select');
 const editStoreName = document.getElementById('edit-store-name');
+const editSpecialFee = document.getElementById('edit-special-fee');
 const vipRoomsContainer = document.getElementById('vip-rooms-container');
 const addVipRoomBtn = document.getElementById('add-vip-room-btn');
 const saveSettingsBtn = document.getElementById('save-settings-btn');
@@ -156,6 +161,12 @@ function updateRoomOptions() {
     } else if (firstAvailableOptionValue) {
         roomGradeSelect.value = firstAvailableOptionValue;
     }
+
+    // Update Special Plan Labels
+    const specialFee = storeConfig.specialPlanFee || 5940;
+    const formattedFee = specialFee.toLocaleString();
+    if (label1Person) label1Person.textContent = `1名様での利用 (60分 ${formattedFee}円)`;
+    if (label40s) label40s.textContent = `40代以上限定プラン (60分 ${formattedFee}円)`;
 }
 
 function calculateFee() {
@@ -172,8 +183,10 @@ function calculateFee() {
     const roomPerPerson = Math.ceil(roomPriceTotal / people);
     
     let matchingFee = 0;
+    const specialFee = storeConfig.specialPlanFee || 5940;
+    
     if (plan1PersonCheckbox.checked || plan40sCheckbox.checked) {
-        matchingFee = SPECIAL_PLAN_FEE;
+        matchingFee = specialFee;
     } else {
         matchingFee = storeConfig.matchingFee[dayType][timeSlot] || 0;
     }
@@ -239,23 +252,27 @@ function loadStoreToForm(storeId) {
     if (!STORE_CONFIGS[storeId]) return;
     const config = STORE_CONFIGS[storeId];
     
-    // Store Name
-    editStoreName.value = config.name;
+    // Store Name & Special Fee
+    if (editStoreName) editStoreName.value = config.name;
+    if (editSpecialFee) editSpecialFee.value = config.specialPlanFee || 5940;
     
     // Matching Fees
     timeKeys.forEach((key, index) => {
-        feeInputs.weekday[index].value = config.matchingFee.weekday[key];
-        feeInputs.weekend[index].value = config.matchingFee.weekend[key];
+        if (feeInputs.weekday[index]) feeInputs.weekday[index].value = config.matchingFee.weekday[key];
+        if (feeInputs.weekend[index]) feeInputs.weekend[index].value = config.matchingFee.weekend[key];
     });
     
     // VIP Rooms (GUI)
-    vipRoomsContainer.innerHTML = '';
-    config.vipRooms.forEach(room => {
-        addVipRoomForm(room);
-    });
+    if (vipRoomsContainer) {
+        vipRoomsContainer.innerHTML = '';
+        config.vipRooms.forEach(room => {
+            addVipRoomForm(room);
+        });
+    }
 }
 
 function addVipRoomForm(room = { name: '', price: 0, maxPeople: 2, dayTypes: ['weekday', 'weekend'] }) {
+    if (!vipRoomsContainer) return;
     const card = document.createElement('div');
     card.className = 'vip-room-card';
     
@@ -301,9 +318,11 @@ function addVipRoomForm(room = { name: '', price: 0, maxPeople: 2, dayTypes: ['w
     vipRoomsContainer.appendChild(card);
 }
 
-addVipRoomBtn.addEventListener('click', () => {
-    addVipRoomForm();
-});
+if (addVipRoomBtn) {
+    addVipRoomBtn.addEventListener('click', () => {
+        addVipRoomForm();
+    });
+}
 
 // Save Settings
 saveSettingsBtn.addEventListener('click', () => {
@@ -312,26 +331,29 @@ saveSettingsBtn.addEventListener('click', () => {
     
         // Extract VIP Rooms from DOM
         const newVipRooms = [];
-        const roomCards = vipRoomsContainer.querySelectorAll('.vip-room-card');
-        roomCards.forEach(card => {
-            const id = card.dataset.roomId;
-            const name = card.querySelector('.room-name').value || '名称未設定';
-            const price = parseInt(card.querySelector('.room-price').value, 10) || 0;
-            const maxPeople = parseInt(card.querySelector('.room-maxPeople').value, 10) || 1;
-            const dayTypeVal = card.querySelector('.room-dayTypes').value;
-            
-            let dayTypes = [];
-            if (dayTypeVal === 'weekday') dayTypes = ['weekday'];
-            else if (dayTypeVal === 'weekend') dayTypes = ['weekend'];
-            else dayTypes = ['weekday', 'weekend'];
+        if (vipRoomsContainer) {
+            const roomCards = vipRoomsContainer.querySelectorAll('.vip-room-card');
+            roomCards.forEach(card => {
+                const id = card.dataset.roomId;
+                const name = card.querySelector('.room-name').value || '名称未設定';
+                const price = parseInt(card.querySelector('.room-price').value, 10) || 0;
+                const maxPeople = parseInt(card.querySelector('.room-maxPeople').value, 10) || 1;
+                const dayTypeVal = card.querySelector('.room-dayTypes').value;
+                
+                let dayTypes = [];
+                if (dayTypeVal === 'weekday') dayTypes = ['weekday'];
+                else if (dayTypeVal === 'weekend') dayTypes = ['weekend'];
+                else dayTypes = ['weekday', 'weekend'];
 
-            newVipRooms.push({ id, name, price, maxPeople, dayTypes });
-        });
+                newVipRooms.push({ id, name, price, maxPeople, dayTypes });
+            });
+        }
 
-    // Update Name
-    STORE_CONFIGS[storeId].name = editStoreName.value;
-    
-    // Update Fees
+        // Update Name & Special Fee
+        if (editStoreName) STORE_CONFIGS[storeId].name = editStoreName.value;
+        if (editSpecialFee) STORE_CONFIGS[storeId].specialPlanFee = parseInt(editSpecialFee.value, 10) || 0;
+        
+        // Update Fees
     timeKeys.forEach((key, index) => {
         STORE_CONFIGS[storeId].matchingFee.weekday[key] = parseInt(feeInputs.weekday[index].value, 10) || 0;
         STORE_CONFIGS[storeId].matchingFee.weekend[key] = parseInt(feeInputs.weekend[index].value, 10) || 0;
