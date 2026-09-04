@@ -273,10 +273,49 @@ select:disabled {
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
 }
-.advanced-settings summary {
+
+.vip-room-card {
+    background: #f9fafb;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+}
+.vip-room-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+@media (max-width: 480px) {
+    .vip-room-card-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.vip-room-card label {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+.vip-room-card input, .vip-room-card select {
+    padding: 0.4rem;
+    font-size: 0.9rem;
+}
+.vip-room-card .full-width {
+    grid-column: 1 / -1;
+}
+.remove-room-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    color: #ef4444;
     cursor: pointer;
-    color: var(--primary);
-    font-weight: 500;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+.remove-room-btn:hover {
+    color: #b91c1c;
 }
 
 .modal-footer {

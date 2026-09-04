@@ -143,11 +143,16 @@
                     </div>
                 </div>
 
-                <details class="advanced-settings">
-                    <summary>高度な設定 (VIPルーム等のJSON編集)</summary>
-                    <textarea id="advanced-json" rows="10" style="width: 100%; margin-top: 0.5rem; font-family: monospace;"></textarea>
-                    <p style="font-size: 0.8rem; color: #ef4444; margin-top: 0.25rem;">※JSONフォーマットが壊れると動作しなくなりますのでご注意ください。</p>
-                </details>
+                <div class="advanced-settings" open>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0;">VIPルーム設定</h3>
+                        <button id="add-vip-room-btn" class="btn" style="background-color: #10b981; color: white; padding: 0.25rem 0.75rem; font-size: 0.85rem;">＋ 新規追加</button>
+                    </div>
+                    
+                    <div id="vip-rooms-container">
+                        <!-- JSでフォームが生成されます -->
+                    </div>
+                </div>
             </div>
 
             <div class="modal-footer">
@@ -157,6 +162,6 @@
         </div>
     </dialog>
 
-    <script src="main.js?v=3"></script>
+    <script src="main.js?v=4"></script>
 </body>
 </html>

@@ -64,7 +64,8 @@ const openSettingsBtn = document.getElementById('open-settings-btn');
 const closeSettingsBtn = document.getElementById('close-settings-btn');
 const editStoreSelect = document.getElementById('edit-store-select');
 const editStoreName = document.getElementById('edit-store-name');
-const advancedJson = document.getElementById('advanced-json');
+const vipRoomsContainer = document.getElementById('vip-rooms-container');
+const addVipRoomBtn = document.getElementById('add-vip-room-btn');
 const saveSettingsBtn = document.getElementById('save-settings-btn');
 const resetSettingsBtn = document.getElementById('reset-settings-btn');
 
@@ -247,44 +248,106 @@ function loadStoreToForm(storeId) {
         feeInputs.weekend[index].value = config.matchingFee.weekend[key];
     });
     
-    // Advanced JSON (VIP Rooms)
-    advancedJson.value = JSON.stringify(config.vipRooms, null, 2);
+    // VIP Rooms (GUI)
+    vipRoomsContainer.innerHTML = '';
+    config.vipRooms.forEach(room => {
+        addVipRoomForm(room);
+    });
 }
+
+function addVipRoomForm(room = { name: '', price: 0, maxPeople: 2, dayTypes: ['weekday', 'weekend'] }) {
+    const card = document.createElement('div');
+    card.className = 'vip-room-card';
+    
+    // UUID for unique ID if missing
+    const roomId = room.id || 'room_' + Math.random().toString(36).substr(2, 9);
+    card.dataset.roomId = roomId;
+
+    let dayTypeHtml = `
+        <select class="room-dayTypes">
+            <option value="weekday" ${room.dayTypes.includes('weekday') && !room.dayTypes.includes('weekend') ? 'selected' : ''}>平日のみ</option>
+            <option value="weekend" ${!room.dayTypes.includes('weekday') && room.dayTypes.includes('weekend') ? 'selected' : ''}>週末のみ</option>
+            <option value="all" ${room.dayTypes.includes('weekday') && room.dayTypes.includes('weekend') ? 'selected' : ''}>全日 (平日・週末)</option>
+        </select>
+    `;
+
+    card.innerHTML = `
+        <button type="button" class="remove-room-btn" aria-label="削除">&times;</button>
+        <div class="vip-room-card-grid">
+            <div class="full-width">
+                <label>部屋名</label>
+                <input type="text" class="room-name" value="${room.name}" placeholder="例: 平日 3,300円 (2名まで)">
+            </div>
+            <div>
+                <label>価格 (円)</label>
+                <input type="number" class="room-price" value="${room.price}" inputmode="numeric">
+            </div>
+            <div>
+                <label>定員 (名)</label>
+                <input type="number" class="room-maxPeople" value="${room.maxPeople}" inputmode="numeric">
+            </div>
+            <div class="full-width">
+                <label>適用曜日</label>
+                ${dayTypeHtml}
+            </div>
+        </div>
+    `;
+
+    // 削除ボタンのイベント
+    card.querySelector('.remove-room-btn').addEventListener('click', () => {
+        card.remove();
+    });
+
+    vipRoomsContainer.appendChild(card);
+}
+
+addVipRoomBtn.addEventListener('click', () => {
+    addVipRoomForm();
+});
 
 // Save Settings
 saveSettingsBtn.addEventListener('click', () => {
     const storeId = editStoreSelect.value;
     if (!STORE_CONFIGS[storeId]) return;
     
-    try {
-        // Parse VIP Rooms JSON first to validate
-        const newVipRooms = JSON.parse(advancedJson.value);
-        if (!Array.isArray(newVipRooms)) throw new Error("VIP Rooms must be an array");
+        // Extract VIP Rooms from DOM
+        const newVipRooms = [];
+        const roomCards = vipRoomsContainer.querySelectorAll('.vip-room-card');
+        roomCards.forEach(card => {
+            const id = card.dataset.roomId;
+            const name = card.querySelector('.room-name').value || '名称未設定';
+            const price = parseInt(card.querySelector('.room-price').value, 10) || 0;
+            const maxPeople = parseInt(card.querySelector('.room-maxPeople').value, 10) || 1;
+            const dayTypeVal = card.querySelector('.room-dayTypes').value;
+            
+            let dayTypes = [];
+            if (dayTypeVal === 'weekday') dayTypes = ['weekday'];
+            else if (dayTypeVal === 'weekend') dayTypes = ['weekend'];
+            else dayTypes = ['weekday', 'weekend'];
 
-        // Update Name
-        STORE_CONFIGS[storeId].name = editStoreName.value;
-        
-        // Update Fees
-        timeKeys.forEach((key, index) => {
-            STORE_CONFIGS[storeId].matchingFee.weekday[key] = parseInt(feeInputs.weekday[index].value, 10) || 0;
-            STORE_CONFIGS[storeId].matchingFee.weekend[key] = parseInt(feeInputs.weekend[index].value, 10) || 0;
+            newVipRooms.push({ id, name, price, maxPeople, dayTypes });
         });
-        
-        // Update VIP Rooms
-        STORE_CONFIGS[storeId].vipRooms = newVipRooms;
-        
-        // Save to localStorage
-        localStorage.setItem('vipFeeConfigs', JSON.stringify(STORE_CONFIGS));
-        
-        alert('設定を保存しました。');
-        modal.close();
-        
-        // Re-init main UI to reflect changes
-        initMain();
-        
-    } catch (e) {
-        alert('エラー: JSONの形式が正しくありません。\n' + e.message);
-    }
+
+    // Update Name
+    STORE_CONFIGS[storeId].name = editStoreName.value;
+    
+    // Update Fees
+    timeKeys.forEach((key, index) => {
+        STORE_CONFIGS[storeId].matchingFee.weekday[key] = parseInt(feeInputs.weekday[index].value, 10) || 0;
+        STORE_CONFIGS[storeId].matchingFee.weekend[key] = parseInt(feeInputs.weekend[index].value, 10) || 0;
+    });
+    
+    // Update VIP Rooms
+    STORE_CONFIGS[storeId].vipRooms = newVipRooms;
+    
+    // Save to localStorage
+    localStorage.setItem('vipFeeConfigs', JSON.stringify(STORE_CONFIGS));
+    
+    alert('設定を保存しました。');
+    modal.close();
+    
+    // Re-init main UI to reflect changes
+    initMain();
 });
 
 // Reset Settings
