@@ -208,7 +208,15 @@ function updateRoomOptions() {
     if (label1Person) label1Person.textContent = `1名様での利用 (60分 ${specialFee.toLocaleString()}円)`;
     if (label40s) label40s.textContent = `40代以上限定プラン (60分 ${specialFee.toLocaleString()}円)`;
     if (labelU25) labelU25.textContent = `U25プラン (24時迄 ${u25B.toLocaleString()}円 / 以降 ${u25A.toLocaleString()}円)`;
-    if (labelZ) labelZ.textContent = `Zプラン (24時迄 ${zB.toLocaleString()}円 / 以降 ${zA.toLocaleString()}円)`;
+    if (labelZ) {
+        if (dayType === 'saturday') {
+            labelZ.textContent = `Zプラン (※土曜日は開催なし)`;
+        } else if (dayType === 'friday') {
+            labelZ.textContent = `Zプラン (24時迄 ${zB.toLocaleString()}円 / 以降 通常料金)`;
+        } else {
+            labelZ.textContent = `Zプラン (24時迄 ${zB.toLocaleString()}円 / 以降 ${zA.toLocaleString()}円)`;
+        }
+    }
 }
 
 function calculateFee() {
@@ -251,7 +259,21 @@ function calculateFee() {
         // Z Plan Logic
         const feeB = storeConfig.zFeeBefore24 || 990;
         const feeA = storeConfig.zFeeAfter24 || 1980;
-        matchingFee = isBefore24 ? feeB : feeA;
+        
+        if (dayType === 'saturday') {
+            // 土曜日は開催なし（通常料金）
+            matchingFee = storeConfig.matchingFee['weekend'][timeSlot] || 0;
+        } else if (dayType === 'friday') {
+            if (isBefore24) {
+                matchingFee = feeB;
+            } else {
+                // 金曜24時以降は通常料金
+                matchingFee = storeConfig.matchingFee['weekend'][timeSlot] || 0;
+            }
+        } else {
+            // 平日・祝前日
+            matchingFee = isBefore24 ? feeB : feeA;
+        }
     } else if ((plan1PersonCheckbox && plan1PersonCheckbox.checked) || (plan40sCheckbox && plan40sCheckbox.checked)) {
         // 1Person / 40s Logic
         matchingFee = storeConfig.specialPlanFee || 5940;
