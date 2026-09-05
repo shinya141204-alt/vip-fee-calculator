@@ -40,9 +40,11 @@
                         <label for="day-type">曜日</label>
                         <div class="select-wrapper">
                             <select id="day-type">
-                                <option value="weekday">平日</option>
-                                <option value="weekend">金・土・祝前日</option>
-                            </select>
+                        <option value="weekday">平日 (月〜木・日)</option>
+                        <option value="friday">金曜日</option>
+                        <option value="saturday">土曜日</option>
+                        <option value="holiday_eve">祝前日</option>
+                    </select>
                         </div>
                     </div>
                     
@@ -77,6 +79,14 @@
                     <label class="checkbox-container">
                         <input type="checkbox" id="plan-40s">
                         <span id="label-40s">40代以上限定プラン (60分 5,940円)</span>
+                    </label>
+                    <label class="checkbox-container" style="margin-top: 0.5rem;">
+                        <input type="checkbox" id="plan-u25">
+                        <span id="label-u25">U25プラン</span>
+                    </label>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="plan-z">
+                        <span id="label-z">Zプラン</span>
                     </label>
                 </div>
             </form>
@@ -148,6 +158,19 @@
                     <input type="number" id="edit-special-fee" style="width: 150px; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 6px;" inputmode="numeric">
                 </div>
 
+                <div class="fee-grid" style="margin-top: 1rem;">
+                    <div>
+                        <h4 style="color: var(--primary);">U25プラン設定</h4>
+                        <label>24時まで <input type="number" id="edit-u25-before" inputmode="numeric"></label>
+                        <label>24時以降 <input type="number" id="edit-u25-after" inputmode="numeric"></label>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--primary);">Zプラン設定</h4>
+                        <label>24時まで <input type="number" id="edit-z-before" inputmode="numeric"></label>
+                        <label>24時以降 <input type="number" id="edit-z-after" inputmode="numeric"></label>
+                    </div>
+                </div>
+
                 <div class="advanced-settings" open>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <h3 style="margin: 0;">VIPルーム設定</h3>
@@ -167,6 +190,6 @@
         </div>
     </dialog>
 
-    <script src="main.js?v=5"></script>
+    <script src="main.js?v=6"></script>
 </body>
 </html>

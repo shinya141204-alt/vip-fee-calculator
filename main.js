@@ -3,6 +3,10 @@ const DEFAULT_STORE_CONFIGS = {
     'store-a': {
         name: 'A店 (現在の設定)',
         specialPlanFee: 5940,
+        u25FeeBefore24: 1980,
+        u25FeeAfter24: 2980,
+        zFeeBefore24: 990,
+        zFeeAfter24: 1980,
         matchingFee: {
             weekday: { 'open-20': 440 * 6, '20-22': 550 * 6, '22-24': 660 * 6, '24-close': 770 * 6 },
             weekend: { 'open-20': 500 * 6, '20-22': 600 * 6, '22-24': 700 * 6, '24-close': 800 * 6 }
@@ -18,6 +22,10 @@ const DEFAULT_STORE_CONFIGS = {
     'store-b': {
         name: 'B店 (ダミーテスト用)',
         specialPlanFee: 6000,
+        u25FeeBefore24: 1980,
+        u25FeeAfter24: 2980,
+        zFeeBefore24: 990,
+        zFeeAfter24: 1980,
         matchingFee: {
             weekday: { 'open-20': 2000, '20-22': 3000, '22-24': 4000, '24-close': 5000 },
             weekend: { 'open-20': 3000, '20-22': 4000, '22-24': 5000, '24-close': 6000 }
@@ -50,8 +58,11 @@ const peopleInput = document.getElementById('people');
 const dayTypeSelect = document.getElementById('day-type');
 const timeSlotSelect = document.getElementById('time-slot');
 const roomGradeSelect = document.getElementById('room-grade');
+
 const plan1PersonCheckbox = document.getElementById('plan-1person');
 const plan40sCheckbox = document.getElementById('plan-40s');
+const planU25Checkbox = document.getElementById('plan-u25');
+const planZCheckbox = document.getElementById('plan-z');
 
 const totalPriceEl = document.getElementById('total-price');
 const breakdownRoomEl = document.getElementById('breakdown-room');
@@ -61,6 +72,8 @@ const resultValueContainer = document.querySelector('.result-value');
 
 const label1Person = document.getElementById('label-1person');
 const label40s = document.getElementById('label-40s');
+const labelU25 = document.getElementById('label-u25');
+const labelZ = document.getElementById('label-z');
 
 // --- DOM Elements (Settings) ---
 const modal = document.getElementById('settings-modal');
@@ -69,6 +82,12 @@ const closeSettingsBtn = document.getElementById('close-settings-btn');
 const editStoreSelect = document.getElementById('edit-store-select');
 const editStoreName = document.getElementById('edit-store-name');
 const editSpecialFee = document.getElementById('edit-special-fee');
+
+const editU25Before = document.getElementById('edit-u25-before');
+const editU25After = document.getElementById('edit-u25-after');
+const editZBefore = document.getElementById('edit-z-before');
+const editZAfter = document.getElementById('edit-z-after');
+
 const vipRoomsContainer = document.getElementById('vip-rooms-container');
 const addVipRoomBtn = document.getElementById('add-vip-room-btn');
 const saveSettingsBtn = document.getElementById('save-settings-btn');
@@ -101,10 +120,12 @@ function initMain() {
 }
 
 // Event Listeners (Main)
-const inputs = [storeSelect, peopleInput, dayTypeSelect, timeSlotSelect, roomGradeSelect, plan40sCheckbox];
+const inputs = [storeSelect, peopleInput, dayTypeSelect, timeSlotSelect, roomGradeSelect, plan40sCheckbox, planU25Checkbox, planZCheckbox];
 inputs.forEach(input => {
-    input.addEventListener('change', handleInputChange);
-    input.addEventListener('input', handleInputChange);
+    if (input) {
+        input.addEventListener('change', handleInputChange);
+        input.addEventListener('input', handleInputChange);
+    }
 });
 
 function handleInputChange(e) {
@@ -121,6 +142,16 @@ function handleInputChange(e) {
         }
     }
     
+    // Checkbox mutual exclusion (optional UX improvement)
+    if (e.target.type === 'checkbox') {
+        const checkboxes = [plan40sCheckbox, planU25Checkbox, planZCheckbox];
+        if (e.target.checked) {
+            checkboxes.forEach(cb => {
+                if (cb !== e.target && cb) cb.checked = false;
+            });
+        }
+    }
+    
     if (e.target === storeSelect || e.target === dayTypeSelect || e.target === peopleInput) {
         updateRoomOptions();
     }
@@ -131,7 +162,11 @@ function updateRoomOptions() {
     const storeId = storeSelect.value;
     if (!storeId || !STORE_CONFIGS[storeId]) return;
     const storeConfig = STORE_CONFIGS[storeId];
+    
     const dayType = dayTypeSelect.value;
+    // Map specific days back to original weekday/weekend for VIP rooms and Normal Fees
+    const baseDayType = (dayType === 'weekday') ? 'weekday' : 'weekend';
+    
     let peopleCount = parseInt(peopleInput.value, 10) || 1;
     
     const currentSelectedRoomId = roomGradeSelect.value;
@@ -146,7 +181,8 @@ function updateRoomOptions() {
         option.textContent = room.name;
         
         let isAvailable = true;
-        if (!room.dayTypes.includes(dayType)) isAvailable = false;
+        // Check availability against baseDayType (weekday or weekend)
+        if (!room.dayTypes.includes(baseDayType)) isAvailable = false;
         if (peopleCount > room.maxPeople) isAvailable = false;
         
         option.disabled = !isAvailable;
@@ -164,16 +200,24 @@ function updateRoomOptions() {
 
     // Update Special Plan Labels
     const specialFee = storeConfig.specialPlanFee || 5940;
-    const formattedFee = specialFee.toLocaleString();
-    if (label1Person) label1Person.textContent = `1名様での利用 (60分 ${formattedFee}円)`;
-    if (label40s) label40s.textContent = `40代以上限定プラン (60分 ${formattedFee}円)`;
+    const u25B = storeConfig.u25FeeBefore24 || 1980;
+    const u25A = storeConfig.u25FeeAfter24 || 2980;
+    const zB = storeConfig.zFeeBefore24 || 990;
+    const zA = storeConfig.zFeeAfter24 || 1980;
+
+    if (label1Person) label1Person.textContent = `1名様での利用 (60分 ${specialFee.toLocaleString()}円)`;
+    if (label40s) label40s.textContent = `40代以上限定プラン (60分 ${specialFee.toLocaleString()}円)`;
+    if (labelU25) labelU25.textContent = `U25プラン (24時迄 ${u25B.toLocaleString()}円 / 以降 ${u25A.toLocaleString()}円)`;
+    if (labelZ) labelZ.textContent = `Zプラン (24時迄 ${zB.toLocaleString()}円 / 以降 ${zA.toLocaleString()}円)`;
 }
 
 function calculateFee() {
     const storeId = storeSelect.value;
     if (!storeId || !STORE_CONFIGS[storeId]) return;
     const storeConfig = STORE_CONFIGS[storeId];
+    
     const dayType = dayTypeSelect.value;
+    const baseDayType = (dayType === 'weekday') ? 'weekday' : 'weekend';
     const timeSlot = timeSlotSelect.value;
     let people = parseInt(peopleInput.value, 10) || 1;
     
@@ -183,12 +227,37 @@ function calculateFee() {
     const roomPerPerson = Math.ceil(roomPriceTotal / people);
     
     let matchingFee = 0;
-    const specialFee = storeConfig.specialPlanFee || 5940;
+    const isBefore24 = (timeSlot === 'open-20' || timeSlot === '20-22' || timeSlot === '22-24');
     
-    if (plan1PersonCheckbox.checked || plan40sCheckbox.checked) {
-        matchingFee = specialFee;
+    if (planU25Checkbox && planU25Checkbox.checked) {
+        // U25 Logic
+        const feeB = storeConfig.u25FeeBefore24 || 1980;
+        const feeA = storeConfig.u25FeeAfter24 || 2980;
+        
+        if (dayType === 'friday') {
+            matchingFee = feeA; // 金曜日は終日2980円
+        } else if (dayType === 'saturday') {
+            if (isBefore24) {
+                matchingFee = feeA; // 土曜24時までは2980円
+            } else {
+                // 土曜24時以降は通常プラン（週末の料金）
+                matchingFee = storeConfig.matchingFee['weekend'][timeSlot] || 0;
+            }
+        } else {
+            // 平日・祝前日
+            matchingFee = isBefore24 ? feeB : feeA;
+        }
+    } else if (planZCheckbox && planZCheckbox.checked) {
+        // Z Plan Logic
+        const feeB = storeConfig.zFeeBefore24 || 990;
+        const feeA = storeConfig.zFeeAfter24 || 1980;
+        matchingFee = isBefore24 ? feeB : feeA;
+    } else if ((plan1PersonCheckbox && plan1PersonCheckbox.checked) || (plan40sCheckbox && plan40sCheckbox.checked)) {
+        // 1Person / 40s Logic
+        matchingFee = storeConfig.specialPlanFee || 5940;
     } else {
-        matchingFee = storeConfig.matchingFee[dayType][timeSlot] || 0;
+        // Normal Plan Logic
+        matchingFee = storeConfig.matchingFee[baseDayType][timeSlot] || 0;
     }
     
     const total = roomPerPerson + matchingFee + CHARGE_FEE;
@@ -222,23 +291,30 @@ function animateValue(obj, end, duration = 400) {
 // --- Settings Logic ---
 
 // Open Modal
-openSettingsBtn.addEventListener('click', () => {
-    populateSettingsSelect();
-    loadStoreToForm(editStoreSelect.value);
-    modal.showModal();
-});
+if (openSettingsBtn) {
+    openSettingsBtn.addEventListener('click', () => {
+        populateSettingsSelect();
+        loadStoreToForm(editStoreSelect.value);
+        modal.showModal();
+    });
+}
 
 // Close Modal
-closeSettingsBtn.addEventListener('click', () => {
-    modal.close();
-});
+if (closeSettingsBtn) {
+    closeSettingsBtn.addEventListener('click', () => {
+        modal.close();
+    });
+}
 
 // Change Store in Settings
-editStoreSelect.addEventListener('change', (e) => {
-    loadStoreToForm(e.target.value);
-});
+if (editStoreSelect) {
+    editStoreSelect.addEventListener('change', (e) => {
+        loadStoreToForm(e.target.value);
+    });
+}
 
 function populateSettingsSelect() {
+    if (!editStoreSelect) return;
     editStoreSelect.innerHTML = '';
     Object.keys(STORE_CONFIGS).forEach(storeId => {
         const option = document.createElement('option');
@@ -252,9 +328,14 @@ function loadStoreToForm(storeId) {
     if (!STORE_CONFIGS[storeId]) return;
     const config = STORE_CONFIGS[storeId];
     
-    // Store Name & Special Fee
+    // Store Name & Special Fees
     if (editStoreName) editStoreName.value = config.name;
     if (editSpecialFee) editSpecialFee.value = config.specialPlanFee || 5940;
+    
+    if (editU25Before) editU25Before.value = config.u25FeeBefore24 || 1980;
+    if (editU25After) editU25After.value = config.u25FeeAfter24 || 2980;
+    if (editZBefore) editZBefore.value = config.zFeeBefore24 || 990;
+    if (editZAfter) editZAfter.value = config.zFeeAfter24 || 1980;
     
     // Matching Fees
     timeKeys.forEach((key, index) => {
@@ -325,10 +406,11 @@ if (addVipRoomBtn) {
 }
 
 // Save Settings
-saveSettingsBtn.addEventListener('click', () => {
-    const storeId = editStoreSelect.value;
-    if (!STORE_CONFIGS[storeId]) return;
-    
+if (saveSettingsBtn) {
+    saveSettingsBtn.addEventListener('click', () => {
+        const storeId = editStoreSelect.value;
+        if (!STORE_CONFIGS[storeId]) return;
+        
         // Extract VIP Rooms from DOM
         const newVipRooms = [];
         if (vipRoomsContainer) {
@@ -349,41 +431,49 @@ saveSettingsBtn.addEventListener('click', () => {
             });
         }
 
-        // Update Name & Special Fee
+        // Update Name & Special Fees
         if (editStoreName) STORE_CONFIGS[storeId].name = editStoreName.value;
         if (editSpecialFee) STORE_CONFIGS[storeId].specialPlanFee = parseInt(editSpecialFee.value, 10) || 0;
         
+        if (editU25Before) STORE_CONFIGS[storeId].u25FeeBefore24 = parseInt(editU25Before.value, 10) || 0;
+        if (editU25After) STORE_CONFIGS[storeId].u25FeeAfter24 = parseInt(editU25After.value, 10) || 0;
+        if (editZBefore) STORE_CONFIGS[storeId].zFeeBefore24 = parseInt(editZBefore.value, 10) || 0;
+        if (editZAfter) STORE_CONFIGS[storeId].zFeeAfter24 = parseInt(editZAfter.value, 10) || 0;
+        
         // Update Fees
-    timeKeys.forEach((key, index) => {
-        STORE_CONFIGS[storeId].matchingFee.weekday[key] = parseInt(feeInputs.weekday[index].value, 10) || 0;
-        STORE_CONFIGS[storeId].matchingFee.weekend[key] = parseInt(feeInputs.weekend[index].value, 10) || 0;
+        timeKeys.forEach((key, index) => {
+            if (feeInputs.weekday[index]) STORE_CONFIGS[storeId].matchingFee.weekday[key] = parseInt(feeInputs.weekday[index].value, 10) || 0;
+            if (feeInputs.weekend[index]) STORE_CONFIGS[storeId].matchingFee.weekend[key] = parseInt(feeInputs.weekend[index].value, 10) || 0;
+        });
+        
+        // Update VIP Rooms
+        STORE_CONFIGS[storeId].vipRooms = newVipRooms;
+        
+        // Save to localStorage
+        localStorage.setItem('vipFeeConfigs', JSON.stringify(STORE_CONFIGS));
+        
+        alert('設定を保存しました。');
+        if (modal) modal.close();
+        
+        // Re-init main UI to reflect changes
+        initMain();
     });
-    
-    // Update VIP Rooms
-    STORE_CONFIGS[storeId].vipRooms = newVipRooms;
-    
-    // Save to localStorage
-    localStorage.setItem('vipFeeConfigs', JSON.stringify(STORE_CONFIGS));
-    
-    alert('設定を保存しました。');
-    modal.close();
-    
-    // Re-init main UI to reflect changes
-    initMain();
-});
+}
 
 // Reset Settings
-resetSettingsBtn.addEventListener('click', () => {
-    if (confirm('すべての設定を初期状態（デフォルト）に戻しますか？\n※現在保存されている変更はすべて破棄されます。')) {
-        localStorage.removeItem('vipFeeConfigs');
-        STORE_CONFIGS = JSON.parse(JSON.stringify(DEFAULT_STORE_CONFIGS));
-        
-        alert('初期設定にリセットしました。');
-        modal.close();
-        
-        initMain();
-    }
-});
+if (resetSettingsBtn) {
+    resetSettingsBtn.addEventListener('click', () => {
+        if (confirm('すべての設定を初期状態（デフォルト）に戻しますか？\n※現在保存されている変更はすべて破棄されます。')) {
+            localStorage.removeItem('vipFeeConfigs');
+            STORE_CONFIGS = JSON.parse(JSON.stringify(DEFAULT_STORE_CONFIGS));
+            
+            alert('初期設定にリセットしました。');
+            if (modal) modal.close();
+            
+            initMain();
+        }
+    });
+}
 
 
 // Start
